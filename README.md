@@ -83,13 +83,14 @@ Run the database migration in your Supabase SQL editor:
 # Copy contents of supabase/migration-001.sql into Supabase SQL Editor and run
 ```
 
-Seed the database:
+Pull live WHO data:
 
 ```bash
-# Copy contents of scripts/seed.sql scratchpad into Supabase SQL Editor and run
-# Or trigger the pipeline to pull live WHO data:
+# Trigger the pipeline to ingest real outbreak data from WHO:
 curl http://localhost:3000/api/cron/update-outbreaks -H "Authorization: Bearer your_cron_secret"
 ```
+
+> All data is 100% real — sourced directly from WHO Disease Outbreak News. No mock or seed data.
 
 Start development:
 
