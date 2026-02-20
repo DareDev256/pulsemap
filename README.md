@@ -21,6 +21,7 @@ PulseMap visualizes disease outbreaks on a dark-mode interactive map with weathe
 - **Search** — Filter by disease name or country
 - **Layer toggles** — Enable/disable heat map, hotspots independently
 - **Automated data pipeline** — WHO API ingestion every 6 hours via Vercel Cron
+- **Backfill API** — POST endpoint to ingest historical WHO data by date range
 
 ## Tech Stack
 
@@ -90,6 +91,23 @@ Pull live WHO data:
 curl http://localhost:3000/api/cron/update-outbreaks -H "Authorization: Bearer your_cron_secret"
 ```
 
+Backfill historical data:
+
+```bash
+# Ingest WHO outbreak reports from a specific date range:
+curl -X POST http://localhost:3000/api/backfill \
+  -H "Authorization: Bearer your_cron_secret" \
+  -H "Content-Type: application/json" \
+  -d '{"startDate": "2024-01-01", "endDate": "2024-12-31", "source": "who", "limit": 200}'
+```
+
+| Parameter   | Type   | Required | Description                          |
+|-------------|--------|----------|--------------------------------------|
+| `startDate` | string | Yes      | Start of range (`YYYY-MM-DD`)        |
+| `endDate`   | string | Yes      | End of range (`YYYY-MM-DD`)          |
+| `source`    | string | No       | Data source — `who` or `all` (default: `who`) |
+| `limit`     | number | No       | Max reports to fetch (default: 200, max: 500) |
+
 > All data is 100% real — sourced directly from WHO Disease Outbreak News. No mock or seed data.
 
 Start development:
@@ -109,6 +127,7 @@ npm run dev
 - [x] **Phase 4** — Automated WHO data pipeline (Vercel Cron, every 6h)
 - [x] **Phase 4** — Geocoding pipeline (Mapbox + static lookup)
 - [x] **Phase 4** — Deduplication and severity estimation
+- [x] **Phase 4** — Historical backfill API endpoint
 
 ### In Progress / Next Up
 
