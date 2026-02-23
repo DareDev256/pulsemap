@@ -116,6 +116,15 @@ Start development:
 npm run dev
 ```
 
+Run tests:
+
+```bash
+npm test            # single run
+npm run test:watch  # watch mode
+```
+
+> 13 unit tests cover the data ingestion layer (`fetch-outbreaks.ts`) — GeoJSON mapping, error handling, null fallbacks, and query shape validation.
+
 ## Roadmap
 
 ### Completed

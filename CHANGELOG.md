@@ -2,6 +2,14 @@
 
 All notable changes to PulseMap will be documented in this file.
 
+## [0.2.1] - 2026-02-22
+
+### Added
+
+- **Test suite** — 13 unit tests for `fetch-outbreaks.ts` covering `fetchOutbreakGeoJSON` and `fetchFeedItems` with full Supabase mock layer. Tests cover GeoJSON mapping, error handling, null fallbacks, query shape validation, and multi-source feed ingestion.
+- **Vitest** added as test runner with `npm test` and `npm run test:watch` scripts
+- `vitest.config.ts` with `@/` path alias support
+
 ## [0.2.0] - 2026-02-19
 
 ### Added
