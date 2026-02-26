@@ -2,6 +2,12 @@
 
 All notable changes to PulseMap will be documented in this file.
 
+## [0.2.2] - 2026-02-26
+
+### Changed
+
+- **README rewrite** — Portfolio-grade documentation with architecture diagram, project structure map, data flow explanation, and tech stack rationale. Added badges with logos, restructured setup instructions with `cp .env.local.example` flow, and replaced flat feature list with detailed table.
+
 ## [0.2.1] - 2026-02-22
 
 ### Added

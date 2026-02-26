@@ -1,66 +1,85 @@
-# PulseMap
+<p align="center">
+  <img src="https://img.shields.io/badge/status-live-22c55e?style=flat-square" alt="Status: Live" />
+  <img src="https://img.shields.io/badge/Next.js-16-black?style=flat-square&logo=nextdotjs" alt="Next.js 16" />
+  <img src="https://img.shields.io/badge/Supabase-Postgres-3ecf8e?style=flat-square&logo=supabase" alt="Supabase" />
+  <img src="https://img.shields.io/badge/Mapbox_GL-dark--v11-4264fb?style=flat-square&logo=mapbox" alt="Mapbox" />
+  <img src="https://img.shields.io/badge/WHO_API-live_feed-0072bc?style=flat-square" alt="WHO Data" />
+</p>
 
-**Real-time global disease surveillance dashboard styled like a weather radar.**
+# 🌍 PulseMap
 
-Track outbreaks, monitor spread patterns, and stay informed — powered by WHO Disease Outbreak News data, updated every 6 hours.
+**Global disease surveillance, visualized like a weather radar.**
 
-[**Live Demo**](https://pulsemap-three.vercel.app)
+Track outbreaks. Monitor spread patterns. Stay informed — powered by real WHO data, refreshed every 6 hours.
 
-![PulseMap Screenshot](https://img.shields.io/badge/status-live-brightgreen) ![Next.js](https://img.shields.io/badge/Next.js-16-black) ![Supabase](https://img.shields.io/badge/Supabase-Postgres-3ecf8e) ![Mapbox](https://img.shields.io/badge/Mapbox_GL-dark--v11-4264fb)
+[**→ Live Demo**](https://pulsemap-three.vercel.app)
 
 ---
 
-## What It Does
+## Why PulseMap Exists
 
-PulseMap visualizes disease outbreaks on a dark-mode interactive map with weather-radar aesthetics. Heat maps show outbreak density, pulsing markers indicate hotspots, and a live feed streams reports from the WHO, CDC, and news sources.
+Disease outbreaks don't announce themselves neatly. Data is scattered across WHO bulletins, news wires, and government reports. PulseMap consolidates it into a single dark-mode map where outbreak density glows like radar returns — green for low concern, red for critical.
 
-- **Heat map layer** — Color gradient from green (low) to red (critical) showing outbreak intensity
-- **Pulsing hotspot markers** — Sized by case count, colored by severity, animated to feel alive
-- **Click-to-detail panels** — Disease info, case counts, severity scores, WHO summaries
-- **Live feed** — Scrollable timeline of outbreak reports with source badges
-- **Search** — Filter by disease name or country
-- **Layer toggles** — Enable/disable heat map, hotspots independently
-- **Automated data pipeline** — WHO API ingestion every 6 hours via Vercel Cron
-- **Backfill API** — POST endpoint to ingest historical WHO data by date range
+This isn't a wrapper around an API. It's a full data pipeline: ingestion from WHO Disease Outbreak News, geocoding, severity estimation, deduplication, and a live-updating frontend that makes the data *feel* urgent.
 
-## Tech Stack
+## What You See
 
-| Layer | Technology | Why |
-|-------|-----------|-----|
-| Frontend | **Next.js 16** + React + TypeScript | SSR, App Router, Vercel-native |
-| Styling | **Tailwind CSS** | Dark theme with custom color system |
-| Map | **Mapbox GL JS** | Dark basemap, heatmap layers, smooth fly-to animations |
-| Backend | **Supabase** (Postgres) | Auth-ready, real-time subscriptions, RLS policies |
-| Data Pipeline | **WHO Disease Outbreak News API** | Structured, reliable, covers global outbreaks |
-| Geocoding | **Mapbox Geocoding API** + static lookup | Country/region to lat/lng |
-| Hosting | **Vercel** | Auto-deploy from GitHub, cron jobs, edge network |
+| Feature | Detail |
+|---------|--------|
+| **Heat map layer** | Outbreak intensity rendered as weighted heatmap — green → yellow → red gradient by severity score |
+| **Pulsing hotspot markers** | Log-scaled by case count, color-coded by severity, animated CSS pulse rings |
+| **Click-to-detail panels** | Disease name, case count, severity classification, WHO summary text |
+| **Live feed** | Chronological outbreak reports with source badges — scrollable, searchable |
+| **Search** | Filter map + feed by disease name or country |
+| **Layer toggles** | Independent visibility controls for heatmap and hotspot layers |
+| **Data source indicator** | Real-time badge showing whether you're seeing live Supabase data or static fallback |
+| **Fly-to navigation** | Click a feed item → map smoothly flies to the outbreak location |
 
 ## Architecture
 
 ```
-┌─────────────────────────────────────┐
-│         Next.js App (Vercel)        │
-├──────────┬──────────┬───────────────┤
-│  Mapbox  │  Feed    │  Cron Job     │
-│  GL JS   │  Panel   │  (6h cycle)   │
-├──────────┴──────────┴───────────────┤
-│         Supabase Backend            │
-│  Postgres · RLS · Realtime-ready    │
-├─────────────────────────────────────┤
-│         WHO Disease Outbreak News   │
-│         API (auto-ingested)         │
-└─────────────────────────────────────┘
+                    ┌──────────────────────────────────┐
+                    │     Vercel Edge Network           │
+                    │     (Next.js 16 App Router)       │
+                    ├──────────┬───────────┬────────────┤
+                    │  Mapbox  │  React UI │  API Layer │
+                    │  GL JS   │  6 comps  │  2 routes  │
+                    │  dark-v11│  client   │  server    │
+                    ├──────────┴───────────┴────────────┤
+                    │         Supabase (Postgres)       │
+                    │    RLS policies · Realtime-ready  │
+                    ├──────────────────────────────────┤
+  Every 6h ───────▶│  WHO Disease Outbreak News API    │
+  POST /backfill ─▶│  Geocoding (Mapbox + static)      │
+                    │  Deduplication · Severity scoring  │
+                    └──────────────────────────────────┘
 ```
+
+**Data flow**: WHO API → `fetch-outbreaks.ts` pipeline → geocode country/region → estimate severity → upsert to Supabase → GeoJSON served to Mapbox GL heatmap + marker layers.
+
+## Tech Stack
+
+| Layer | Choice | Rationale |
+|-------|--------|-----------|
+| Framework | **Next.js 16** (App Router) | SSR + server routes + Vercel-native cron |
+| UI | **React 19** + TypeScript | Strict typing across all 6 components |
+| Styling | **Tailwind CSS 4** | Custom dark theme, no default palette |
+| Map | **Mapbox GL JS** | Heatmap layers, smooth fly-to, dark basemap |
+| Database | **Supabase** (Postgres) | Row-level security, realtime subscriptions |
+| Data Source | **WHO DON API** | Structured, authoritative, global coverage |
+| Geocoding | **Mapbox Geocoding** + static lookup | Hybrid: API for precision, static for speed |
+| Testing | **Vitest** | 13 unit tests on data ingestion layer |
+| Hosting | **Vercel** | Auto-deploy, cron scheduling, edge CDN |
 
 ## Getting Started
 
 ### Prerequisites
 
 - Node.js 18+
-- [Mapbox account](https://www.mapbox.com/) (free tier)
-- [Supabase project](https://supabase.com/) (free tier)
+- [Mapbox account](https://www.mapbox.com/) (free tier works)
+- [Supabase project](https://supabase.com/) (free tier works)
 
-### Setup
+### Install
 
 ```bash
 git clone https://github.com/DareDev256/pulsemap.git
@@ -68,99 +87,122 @@ cd pulsemap
 npm install
 ```
 
-Create `.env.local`:
+### Configure
+
+Create `.env.local` from the example:
+
+```bash
+cp .env.local.example .env.local
+```
+
+Required variables:
 
 ```env
-NEXT_PUBLIC_MAPBOX_TOKEN=your_mapbox_token
-NEXT_PUBLIC_SUPABASE_URL=your_supabase_url
-NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
-SUPABASE_SERVICE_ROLE_KEY=your_service_role_key
-CRON_SECRET=your_cron_secret
+NEXT_PUBLIC_MAPBOX_TOKEN=     # Mapbox GL access token
+NEXT_PUBLIC_SUPABASE_URL=     # Supabase project URL
+NEXT_PUBLIC_SUPABASE_ANON_KEY=# Supabase anon/public key
+SUPABASE_SERVICE_ROLE_KEY=    # Supabase service role (server-side only)
+CRON_SECRET=                  # Auth token for cron + backfill endpoints
 ```
 
-Run the database migration in your Supabase SQL editor:
+### Database Setup
+
+Run the migration in your Supabase SQL editor:
 
 ```bash
-# Copy contents of supabase/migration-001.sql into Supabase SQL Editor and run
+# Copy contents of supabase/migration-001.sql into Supabase SQL Editor → Run
 ```
 
-Pull live WHO data:
+### Ingest Data
+
+All data is **100% real** — sourced directly from WHO Disease Outbreak News. No mock or seed data.
 
 ```bash
-# Trigger the pipeline to ingest real outbreak data from WHO:
-curl http://localhost:3000/api/cron/update-outbreaks -H "Authorization: Bearer your_cron_secret"
-```
+# Pull current outbreaks
+curl http://localhost:3000/api/cron/update-outbreaks \
+  -H "Authorization: Bearer $CRON_SECRET"
 
-Backfill historical data:
-
-```bash
-# Ingest WHO outbreak reports from a specific date range:
+# Backfill a date range
 curl -X POST http://localhost:3000/api/backfill \
-  -H "Authorization: Bearer your_cron_secret" \
+  -H "Authorization: Bearer $CRON_SECRET" \
   -H "Content-Type: application/json" \
-  -d '{"startDate": "2024-01-01", "endDate": "2024-12-31", "source": "who", "limit": 200}'
+  -d '{"startDate":"2024-01-01","endDate":"2024-12-31","source":"who","limit":200}'
 ```
 
-| Parameter   | Type   | Required | Description                          |
-|-------------|--------|----------|--------------------------------------|
-| `startDate` | string | Yes      | Start of range (`YYYY-MM-DD`)        |
-| `endDate`   | string | Yes      | End of range (`YYYY-MM-DD`)          |
-| `source`    | string | No       | Data source — `who` or `all` (default: `who`) |
-| `limit`     | number | No       | Max reports to fetch (default: 200, max: 500) |
+#### Backfill API Parameters
 
-> All data is 100% real — sourced directly from WHO Disease Outbreak News. No mock or seed data.
+| Parameter   | Type   | Required | Description |
+|-------------|--------|----------|-------------|
+| `startDate` | string | Yes | Range start (`YYYY-MM-DD`) |
+| `endDate`   | string | Yes | Range end (`YYYY-MM-DD`) |
+| `source`    | string | No | `who` or `all` (default: `who`) |
+| `limit`     | number | No | Max reports (default: 200, max: 500) |
 
-Start development:
+### Run
 
 ```bash
-npm run dev
+npm run dev          # Development server
+npm run build        # Production build
+npm test             # Run test suite (13 tests)
+npm run test:watch   # Watch mode
 ```
 
-Run tests:
+## Project Structure
 
-```bash
-npm test            # single run
-npm run test:watch  # watch mode
 ```
-
-> 13 unit tests cover the data ingestion layer (`fetch-outbreaks.ts`) — GeoJSON mapping, error handling, null fallbacks, and query shape validation.
+src/
+├── app/
+│   ├── api/
+│   │   ├── cron/          # Vercel Cron job — WHO ingestion every 6h
+│   │   └── backfill/      # POST endpoint — historical data by date range
+│   ├── page.tsx           # Main dashboard (client component)
+│   └── globals.css        # Dark theme + hotspot marker animations
+├── components/
+│   ├── PulseMap.tsx        # Mapbox GL map with heatmap + markers
+│   ├── Feed.tsx            # Scrollable outbreak feed
+│   ├── Navbar.tsx          # Top bar with search
+│   ├── LayerControls.tsx   # Heatmap/hotspot toggle panel
+│   ├── Legend.tsx          # Color severity legend
+│   └── OutbreakDetail.tsx  # Click-to-detail side panel
+├── lib/
+│   ├── fetch-outbreaks.ts  # Supabase query → GeoJSON transform
+│   ├── pipeline/           # WHO API client + geocoding + dedup
+│   ├── seed-data.ts        # Static fallback data
+│   └── supabase.ts         # Client initialization
+└── types/                  # Shared TypeScript interfaces
+```
 
 ## Roadmap
 
-### Completed
+### ✅ Shipped
 
-- [x] **Phase 1** — Interactive map with heat map + pulsing hotspot markers
-- [x] **Phase 1** — Dark weather-station UI with live feed panel
-- [x] **Phase 1** — Supabase backend with full schema and RLS
-- [x] **Phase 1** — Click-to-detail panels with outbreak stats
-- [x] **Phase 4** — Automated WHO data pipeline (Vercel Cron, every 6h)
-- [x] **Phase 4** — Geocoding pipeline (Mapbox + static lookup)
-- [x] **Phase 4** — Deduplication and severity estimation
-- [x] **Phase 4** — Historical backfill API endpoint
+- **Phase 1** — Interactive heatmap + pulsing hotspot markers on dark basemap
+- **Phase 1** — Weather-station UI: feed panel, detail drawer, severity legend
+- **Phase 1** — Supabase backend with RLS policies
+- **Phase 4** — Automated WHO pipeline via Vercel Cron (6h cycle)
+- **Phase 4** — Geocoding, deduplication, severity estimation
+- **Phase 4** — Historical backfill API endpoint
 
-### In Progress / Next Up
+### 🔜 Next Up
 
-- [ ] **Phase 2** — News pin map layer (toggle geolocated news markers)
-- [ ] **Phase 3** — Google OAuth sign-in via Supabase Auth
-- [ ] **Phase 3** — User preferences (saved view, filters, "near me" default)
-- [ ] **Phase 3** — Notification system for new outbreaks in your region
-- [ ] **Phase 4+** — CDC API integration as secondary data source
-- [ ] **Phase 4+** — LLM-powered news extraction from general news APIs
-- [ ] **Phase 5** — Community reporting layer (submit + moderate user reports)
-- [ ] **Phase 5** — Real-time feed via Supabase subscriptions
-- [ ] **Phase 5** — Trust scoring and spam/misinformation safeguards
-- [ ] Spread front animation layer (animated arcs showing outbreak movement)
-- [ ] Historical outbreak timeline slider
-- [ ] Mobile-responsive layout
-- [ ] PWA support for offline access
+- **Phase 2** — News pin layer (geolocated news markers, toggleable)
+- **Phase 3** — Google OAuth + user preferences (saved views, "near me")
+- **Phase 3** — Push notifications for outbreaks in your region
+- **Phase 4+** — CDC API as secondary data source
+- **Phase 4+** — LLM-powered extraction from general news APIs
+- **Phase 5** — Community reporting + moderation + trust scoring
+- **Phase 5** — Real-time Supabase subscriptions
+- Spread-front animation (animated arcs showing outbreak movement)
+- Historical timeline slider
+- Mobile-responsive layout + PWA offline access
 
 ## Data Sources
 
-| Source | Status | Update Frequency |
-|--------|--------|-----------------|
-| WHO Disease Outbreak News | Active | Every 6 hours |
+| Source | Status | Frequency |
+|--------|--------|-----------|
+| WHO Disease Outbreak News | **Active** | Every 6 hours |
 | CDC | Planned | — |
-| ReliefWeb | Planned (requires appname registration) | — |
+| ReliefWeb | Planned | — |
 | Community Reports | Planned (Phase 5) | Real-time |
 
 ## License
