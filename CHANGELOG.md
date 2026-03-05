@@ -2,6 +2,17 @@
 
 All notable changes to PulseMap will be documented in this file.
 
+## [0.2.4] - 2026-03-05
+
+### Added
+
+- **WHO parser test suite** -- 22 unit tests for `extractDisease`, `extractCountry`, and `estimateSeverity` covering all 27 disease patterns, dash/en-dash/em-dash separators, suffix stripping, severity keyword priority, and edge cases (empty strings, multi-keyword titles).
+- Exported `extractDisease`, `extractCountry`, `estimateSeverity` from `who-parser.ts` for testability.
+
+### Fixed
+
+- **Country extraction bug for hyphenated diseases** -- `extractCountry("COVID-19 - Global")` returned `"19 - Global"` because the regex matched the first dash in `COVID-19` instead of the last separator dash. Fixed by using a greedy prefix `.*` so the regex always captures text after the final dash. This bug affected all WHO DON titles containing `COVID-19`, `SARS-CoV-2`, and `MERS-CoV`.
+
 ## [0.2.3] - 2026-03-05
 
 ### Security

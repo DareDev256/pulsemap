@@ -68,7 +68,7 @@ This isn't a wrapper around an API. It's a full data pipeline: ingestion from WH
 | Database | **Supabase** (Postgres) | Row-level security, realtime subscriptions |
 | Data Source | **WHO DON API** | Structured, authoritative, global coverage |
 | Geocoding | **Mapbox Geocoding** + static lookup | Hybrid: API for precision, static for speed |
-| Testing | **Vitest** | 13 unit tests on data ingestion layer |
+| Testing | **Vitest** | 35 unit tests across data ingestion + WHO parser |
 | Hosting | **Vercel** | Auto-deploy, cron scheduling, edge CDN |
 
 ## Getting Started
@@ -143,7 +143,7 @@ curl -X POST http://localhost:3000/api/backfill \
 ```bash
 npm run dev          # Development server
 npm run build        # Production build
-npm test             # Run test suite (13 tests)
+npm test             # Run test suite (35 tests)
 npm run test:watch   # Watch mode
 ```
 

@@ -31,16 +31,17 @@ const DISEASE_PATTERNS: [RegExp, string][] = [
   [/respiratory syndrome/i, "MERS-CoV"],
 ];
 
-function extractDisease(title: string): string {
+export function extractDisease(title: string): string {
   for (const [pattern, name] of DISEASE_PATTERNS) {
     if (pattern.test(title)) return name;
   }
   return "Unknown Disease";
 }
 
-function extractCountry(title: string): string {
+export function extractCountry(title: string): string {
   // WHO DON titles follow pattern: "Disease name - Country" or "Disease name- Country"
-  const dashMatch = title.match(/[-–—]\s*(.+?)$/);
+  // Use the LAST dash-separator to avoid matching hyphens inside disease names (COVID-19, MERS-CoV)
+  const dashMatch = title.match(/.*[-–—]\s*(.+?)$/);
   if (dashMatch) {
     const country = dashMatch[1].trim();
     // Clean up common suffixes
@@ -54,7 +55,7 @@ function extractCountry(title: string): string {
   return "Unknown";
 }
 
-function estimateSeverity(title: string, summary: string): "low" | "moderate" | "severe" | "critical" {
+export function estimateSeverity(title: string, summary: string): "low" | "moderate" | "severe" | "critical" {
   const text = `${title} ${summary}`.toLowerCase();
 
   // Look for explicit risk assessments in WHO summaries
