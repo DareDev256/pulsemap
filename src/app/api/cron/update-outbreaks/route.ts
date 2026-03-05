@@ -2,18 +2,15 @@ import { NextRequest, NextResponse } from "next/server";
 import { fetchWHOOutbreaks } from "@/lib/pipeline/who-parser";
 import { fetchReliefWebOutbreaks } from "@/lib/pipeline/reliefweb-parser";
 import { processReports } from "@/lib/pipeline/dedup";
+import { validatePipelineAuth, sanitizeErrorMessage } from "@/lib/pipeline/auth";
 
 export const maxDuration = 60; // Allow up to 60s for the pipeline
 export const dynamic = "force-dynamic";
 
 export async function GET(request: NextRequest) {
-  // Verify cron secret to prevent unauthorized triggers
-  const authHeader = request.headers.get("authorization");
-  const cronSecret = process.env.CRON_SECRET;
-
-  if (cronSecret && authHeader !== `Bearer ${cronSecret}`) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  }
+  // Fail-closed auth: rejects when CRON_SECRET is missing or token is wrong
+  const authError = validatePipelineAuth(request);
+  if (authError) return authError;
 
   const startTime = Date.now();
 
@@ -61,7 +58,7 @@ export async function GET(request: NextRequest) {
       {
         success: false,
         duration: `${duration}s`,
-        error: error instanceof Error ? error.message : "Unknown error",
+        error: sanitizeErrorMessage(error),
         timestamp: new Date().toISOString(),
       },
       { status: 500 }

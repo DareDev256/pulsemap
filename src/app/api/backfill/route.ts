@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { processReports } from "@/lib/pipeline/dedup";
 import { RawOutbreakReport } from "@/lib/pipeline/types";
+import { validatePipelineAuth, sanitizeErrorMessage } from "@/lib/pipeline/auth";
 
 export const maxDuration = 120; // Backfill may process larger batches
 export const dynamic = "force-dynamic";
@@ -92,10 +93,14 @@ async function fetchWHOByDateRange(
   });
 
   const url = `${WHO_BASE_URL}?${params.toString()}`;
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), 15_000);
   const res = await fetch(url, {
     headers: { "User-Agent": "PulseMap/1.0 (health-surveillance-dashboard)" },
+    signal: controller.signal,
     next: { revalidate: 0 },
   });
+  clearTimeout(timeout);
 
   if (!res.ok) {
     throw new Error(`WHO API returned ${res.status}: ${res.statusText}`);
@@ -134,20 +139,29 @@ function isValidDate(d: string): boolean {
   return /^\d{4}-\d{2}-\d{2}$/.test(d) && !isNaN(Date.parse(d));
 }
 
-export async function POST(request: NextRequest) {
-  // Auth — same pattern as cron endpoint
-  const authHeader = request.headers.get("authorization");
-  const cronSecret = process.env.CRON_SECRET;
+// Allowed source values — reject anything outside this set
+const ALLOWED_SOURCES = new Set(["who", "all"]);
 
-  if (cronSecret && authHeader !== `Bearer ${cronSecret}`) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  }
+export async function POST(request: NextRequest) {
+  // Fail-closed auth: rejects when CRON_SECRET is missing or token is wrong
+  const authError = validatePipelineAuth(request);
+  if (authError) return authError;
 
   const startTime = Date.now();
 
   try {
     const body = await request.json();
-    const { startDate, endDate, source = "who", limit = 200 } = body;
+    const { startDate, endDate, limit = 200 } = body;
+
+    // Validate source against allowlist — never reflect raw user input
+    const source = ALLOWED_SOURCES.has(body.source) ? body.source : null;
+    if (body.source && !source) {
+      return NextResponse.json(
+        { error: "Unsupported source. Available: who, all" },
+        { status: 400 }
+      );
+    }
+    const safeSource = source || "who";
 
     // Validate required fields
     if (!startDate || !endDate) {
@@ -174,17 +188,12 @@ export async function POST(request: NextRequest) {
     // Cap limit to prevent abuse
     const safeLim = Math.min(Math.max(1, Number(limit) || 200), 500);
 
-    console.log(`[Backfill] ${source} from ${startDate} to ${endDate} (limit ${safeLim})`);
+    console.log(`[Backfill] ${safeSource} from ${startDate} to ${endDate} (limit ${safeLim})`);
 
     let reports: RawOutbreakReport[] = [];
 
-    if (source === "who" || source === "all") {
+    if (safeSource === "who" || safeSource === "all") {
       reports = await fetchWHOByDateRange(startDate, endDate, safeLim);
-    } else {
-      return NextResponse.json(
-        { error: `Unsupported source: ${source}. Available: who, all` },
-        { status: 400 }
-      );
     }
 
     console.log(`[Backfill] Fetched ${reports.length} reports, processing...`);
@@ -195,7 +204,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({
       success: true,
       duration: `${duration}s`,
-      query: { startDate, endDate, source, limit: safeLim },
+      query: { startDate, endDate, source: safeSource, limit: safeLim },
       fetched: reports.length,
       results: {
         new_outbreaks: result.newOutbreaks,
@@ -213,7 +222,7 @@ export async function POST(request: NextRequest) {
       {
         success: false,
         duration: `${duration}s`,
-        error: error instanceof Error ? error.message : "Unknown error",
+        error: sanitizeErrorMessage(error),
         timestamp: new Date().toISOString(),
       },
       { status: 500 }

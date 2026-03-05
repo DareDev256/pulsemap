@@ -2,6 +2,16 @@
 
 All notable changes to PulseMap will be documented in this file.
 
+## [0.2.3] - 2026-03-05
+
+### Security
+
+- **Fail-closed API authentication** -- Both `/api/backfill` and `/api/cron/update-outbreaks` now reject all requests when `CRON_SECRET` is not configured, preventing accidental public access to data-mutation endpoints (OWASP A01:2021 Broken Access Control). Previously, a missing env var silently disabled auth.
+- **Timing-safe token comparison** -- Bearer token validation uses constant-time comparison to mitigate timing-based token extraction attacks.
+- **Error message sanitization** -- API error responses no longer leak raw `error.message` contents (stack traces, internal paths). Only known-safe messages (upstream status codes, timeouts) are exposed to clients.
+- **Input allowlist for source parameter** -- The backfill endpoint validates the `source` field against an explicit allowlist instead of reflecting arbitrary user input in logs and responses.
+- **Fetch timeout on backfill WHO requests** -- Added 15s AbortController timeout to prevent hung serverless functions from slow/unreachable upstream APIs.
+
 ## [0.2.2] - 2026-02-26
 
 ### Changed

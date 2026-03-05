@@ -147,6 +147,16 @@ npm test             # Run test suite (13 tests)
 npm run test:watch   # Watch mode
 ```
 
+## Security
+
+Pipeline API routes (`/api/cron/*`, `/api/backfill`) use fail-closed authentication:
+
+- **`CRON_SECRET` is mandatory** -- requests are rejected with `503` when the env var is missing, not silently allowed through
+- **Timing-safe token comparison** -- Bearer tokens are compared in constant time to prevent timing attacks
+- **Error sanitization** -- API errors never leak stack traces or internal paths to clients
+- **Input allowlisting** -- the `source` parameter is validated against a strict allowlist
+- **Upstream timeouts** -- all external API fetches use `AbortController` with a 15s deadline
+
 ## Project Structure
 
 ```
