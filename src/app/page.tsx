@@ -7,6 +7,7 @@ import LayerControls from "@/components/LayerControls";
 import Legend from "@/components/Legend";
 import OutbreakDetail from "@/components/OutbreakDetail";
 import Feed from "@/components/Feed";
+import StatsBar from "@/components/StatsBar";
 import { seedOutbreaks, seedFeedItems, FeedItem } from "@/lib/seed-data";
 import { fetchOutbreakGeoJSON, fetchFeedItems } from "@/lib/fetch-outbreaks";
 import { OutbreakGeoJSON, OutbreakGeoFeature, LayerVisibility } from "@/types";
@@ -118,8 +119,11 @@ export default function Home() {
         />
       </div>
 
+      {/* Stats Bar */}
+      <StatsBar data={outbreakData} />
+
       {/* Feed Section */}
-      <div className="h-[35vh] border-t border-border">
+      <div className="flex-none border-t border-border" style={{ height: "calc(35vh - 28px)" }}>
         <Feed
           items={feedItems}
           searchQuery={searchQuery}

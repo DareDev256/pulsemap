@@ -29,6 +29,7 @@ This isn't a wrapper around an API. It's a full data pipeline: ingestion from WH
 | **Heat map layer** | Outbreak intensity rendered as weighted heatmap — green → yellow → red gradient by severity score |
 | **Pulsing hotspot markers** | Log-scaled by case count, color-coded by severity, animated CSS pulse rings |
 | **Click-to-detail panels** | Disease name, case count, severity classification, WHO summary text |
+| **Stats bar** | Aggregate dashboard strip — outbreak count, total cases, countries affected, critical alerts, severity distribution, top disease |
 | **Live feed** | Chronological outbreak reports with source badges — scrollable, searchable |
 | **Search** | Filter map + feed by disease name or country |
 | **Layer toggles** | Independent visibility controls for heatmap and hotspot layers |
@@ -43,7 +44,7 @@ This isn't a wrapper around an API. It's a full data pipeline: ingestion from WH
                     │     (Next.js 16 App Router)       │
                     ├──────────┬───────────┬────────────┤
                     │  Mapbox  │  React UI │  API Layer │
-                    │  GL JS   │  6 comps  │  2 routes  │
+                    │  GL JS   │  7 comps  │  2 routes  │
                     │  dark-v11│  client   │  server    │
                     ├──────────┴───────────┴────────────┤
                     │         Supabase (Postgres)       │
@@ -62,7 +63,7 @@ This isn't a wrapper around an API. It's a full data pipeline: ingestion from WH
 | Layer | Choice | Rationale |
 |-------|--------|-----------|
 | Framework | **Next.js 16** (App Router) | SSR + server routes + Vercel-native cron |
-| UI | **React 19** + TypeScript | Strict typing across all 6 components |
+| UI | **React 19** + TypeScript | Strict typing across all 7 components |
 | Styling | **Tailwind CSS 4** | Custom dark theme, no default palette |
 | Map | **Mapbox GL JS** | Heatmap layers, smooth fly-to, dark basemap |
 | Database | **Supabase** (Postgres) | Row-level security, realtime subscriptions |

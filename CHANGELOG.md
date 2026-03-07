@@ -2,6 +2,12 @@
 
 All notable changes to PulseMap will be documented in this file.
 
+## [0.2.5] - 2026-03-07
+
+### Fixed
+
+- **StatsBar component not rendering** -- Created `StatsBar.tsx` and integrated it into the main page layout between the map and feed sections. Displays real-time aggregate stats: outbreak count, total cases (with M/K formatting), affected countries, critical alert count with pulse indicator, severity distribution bar, and top disease by case volume. Uses `useMemo` for derived calculations, `tabular-nums` for stable numeric widths, and accounts for its height in the feed section to prevent viewport overflow.
+
 ## [0.2.4] - 2026-03-05
 
 ### Added
