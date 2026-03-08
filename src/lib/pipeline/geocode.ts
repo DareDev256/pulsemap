@@ -111,7 +111,10 @@ export async function geocodeLocation(
       };
     }
   } catch (error) {
-    console.error(`Geocoding failed for "${query}":`, error);
+    // Log only the error message — never the full error object, which may
+    // contain the request URL with the Mapbox access_token in it.
+    const msg = error instanceof Error ? error.message : "unknown error";
+    console.error(`Geocoding failed for "${query}": ${msg}`);
   }
 
   return null;

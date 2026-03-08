@@ -2,6 +2,15 @@
 
 All notable changes to PulseMap will be documented in this file.
 
+## [0.2.6] - 2026-03-08
+
+### Security
+
+- **Security headers on all responses** -- Added CSP, X-Frame-Options (DENY), HSTS, X-Content-Type-Options, Referrer-Policy, and Permissions-Policy via `next.config.ts`. CSP allowlists Mapbox GL, Supabase, WHO API, and Google Fonts — blocks all other script/connect origins. Addresses OWASP A05:2021 (Security Misconfiguration) and clickjacking.
+- **Fail-fast Supabase admin client** -- `supabase-admin.ts` now validates required env vars at initialization and throws a descriptive error when missing, instead of silently creating a broken client.
+- **WHO fetch timeout parity** -- `fetchWHOOutbreaks()` now uses a 15s `AbortController` timeout matching the backfill route, preventing hung serverless functions.
+- **Mapbox token leak prevention** -- Geocoding error handler now logs only `error.message` instead of the full error object, which could contain the Mapbox `access_token`.
+
 ## [0.2.5] - 2026-03-07
 
 ### Fixed

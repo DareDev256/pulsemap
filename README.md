@@ -150,13 +150,21 @@ npm run test:watch   # Watch mode
 
 ## Security
 
-Pipeline API routes (`/api/cron/*`, `/api/backfill`) use fail-closed authentication:
+**Response headers** (all routes):
+
+- **Content Security Policy** -- script/connect/style origins allowlisted per-service (Mapbox, Supabase, WHO, Google Fonts). Everything else blocked.
+- **X-Frame-Options: DENY** + `frame-ancestors 'none'` -- prevents clickjacking
+- **HSTS** -- enforces HTTPS for 1 year including subdomains
+- **X-Content-Type-Options / Referrer-Policy / Permissions-Policy** -- blocks MIME sniffing, controls Referer leakage, disables unused browser APIs
+
+**API authentication** (`/api/cron/*`, `/api/backfill`):
 
 - **`CRON_SECRET` is mandatory** -- requests are rejected with `503` when the env var is missing, not silently allowed through
 - **Timing-safe token comparison** -- Bearer tokens are compared in constant time to prevent timing attacks
 - **Error sanitization** -- API errors never leak stack traces or internal paths to clients
 - **Input allowlisting** -- the `source` parameter is validated against a strict allowlist
 - **Upstream timeouts** -- all external API fetches use `AbortController` with a 15s deadline
+- **Fail-fast env validation** -- server-side Supabase client throws immediately if credentials are missing instead of failing silently
 
 ## Project Structure
 

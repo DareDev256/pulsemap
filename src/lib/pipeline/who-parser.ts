@@ -79,9 +79,13 @@ interface WHODon {
 }
 
 export async function fetchWHOOutbreaks(): Promise<RawOutbreakReport[]> {
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), 15_000);
+
   try {
     const res = await fetch(WHO_API_URL, {
       headers: { "User-Agent": "PulseMap/1.0 (health-surveillance-dashboard)" },
+      signal: controller.signal,
       next: { revalidate: 0 },
     });
 
@@ -120,7 +124,13 @@ export async function fetchWHOOutbreaks(): Promise<RawOutbreakReport[]> {
     console.log(`WHO: Parsed ${reports.length} outbreak reports from ${items.length} DON items`);
     return reports;
   } catch (error) {
-    console.error("WHO API parser error:", error);
+    if (error instanceof DOMException && error.name === "AbortError") {
+      console.error("WHO API request timed out after 15s");
+    } else {
+      console.error("WHO API parser error:", error);
+    }
     return [];
+  } finally {
+    clearTimeout(timeout);
   }
 }
