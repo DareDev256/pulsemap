@@ -32,7 +32,8 @@ This isn't a wrapper around an API. It's a full data pipeline: ingestion from WH
 | **Stats bar** | Aggregate dashboard strip — outbreak count, total cases, countries affected, critical alerts, severity distribution, top disease |
 | **Live feed** | Chronological outbreak reports with source badges — scrollable, searchable |
 | **Search** | Filter map + feed by disease name or country |
-| **Layer toggles** | Independent visibility controls for heatmap and hotspot layers |
+| **Spread network** | Animated great-circle arcs connecting outbreak locations of the same disease — glowing lines with flowing dash animation, color-coded by severity |
+| **Layer toggles** | Independent visibility controls for heatmap, hotspot, and spread layers |
 | **Data source indicator** | Real-time badge showing whether you're seeing live Supabase data or static fallback |
 | **Fly-to navigation** | Click a feed item → map smoothly flies to the outbreak location |
 
@@ -69,7 +70,7 @@ This isn't a wrapper around an API. It's a full data pipeline: ingestion from WH
 | Database | **Supabase** (Postgres) | Row-level security, realtime subscriptions |
 | Data Source | **WHO DON API** | Structured, authoritative, global coverage |
 | Geocoding | **Mapbox Geocoding** + static lookup | Hybrid: API for precision, static for speed |
-| Testing | **Vitest** | 35 unit tests across data ingestion + WHO parser |
+| Testing | **Vitest** | 43 unit tests across data ingestion, WHO parser, + spread arcs |
 | Hosting | **Vercel** | Auto-deploy, cron scheduling, edge CDN |
 
 ## Getting Started
@@ -144,7 +145,7 @@ curl -X POST http://localhost:3000/api/backfill \
 ```bash
 npm run dev          # Development server
 npm run build        # Production build
-npm test             # Run test suite (35 tests)
+npm test             # Run test suite (43 tests)
 npm run test:watch   # Watch mode
 ```
 
@@ -185,6 +186,7 @@ src/
 │   └── OutbreakDetail.tsx  # Click-to-detail side panel
 ├── lib/
 │   ├── fetch-outbreaks.ts  # Supabase query → GeoJSON transform
+│   ├── spread-arcs.ts      # Great-circle arc generator for disease networks
 │   ├── pipeline/           # WHO API client + geocoding + dedup
 │   ├── seed-data.ts        # Static fallback data
 │   └── supabase.ts         # Client initialization
@@ -201,6 +203,7 @@ src/
 - **Phase 4** — Automated WHO pipeline via Vercel Cron (6h cycle)
 - **Phase 4** — Geocoding, deduplication, severity estimation
 - **Phase 4** — Historical backfill API endpoint
+- **Phase 2** — Disease spread network with animated great-circle arcs
 
 ### 🔜 Next Up
 
@@ -211,7 +214,6 @@ src/
 - **Phase 4+** — LLM-powered extraction from general news APIs
 - **Phase 5** — Community reporting + moderation + trust scoring
 - **Phase 5** — Real-time Supabase subscriptions
-- Spread-front animation (animated arcs showing outbreak movement)
 - Historical timeline slider
 - Mobile-responsive layout + PWA offline access
 

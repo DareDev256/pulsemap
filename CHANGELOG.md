@@ -2,6 +2,15 @@
 
 All notable changes to PulseMap will be documented in this file.
 
+## [0.3.0] - 2026-03-08
+
+### Added
+
+- **Disease spread network visualization** — Animated great-circle arcs connect outbreak locations sharing the same disease, creating a "global threat network" overlay on the dark basemap. Uses spherical linear interpolation for naturally curved arcs (64-point resolution), star topology with highest-case-count location as hub, severity-based color coding, dual-layer glow effect (wide blur + narrow bright core), and animated dash pattern for a "data flowing" effect. Toggled via the existing Spread layer control (no longer disabled).
+- **Spread arc generator** (`src/lib/spread-arcs.ts`) — Pure function that computes GeoJSON LineString arcs from outbreak GeoFeatures, grouped by disease name. Handles degenerate cases (same coordinates, single locations, antipodal points).
+- **Spread legend entry** — Legend component now conditionally shows a gradient-colored spread network indicator when the Spread layer is active.
+- **8 new unit tests** for spread arc generation covering empty inputs, single-location diseases, hub selection, severity ranking, arc resolution, proximity filtering, and multi-disease independence. Test suite now at 43 total tests.
+
 ## [0.2.6] - 2026-03-08
 
 ### Security

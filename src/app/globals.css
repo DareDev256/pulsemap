@@ -103,6 +103,25 @@ body {
   animation: pulse-dot 2s ease-in-out infinite;
 }
 
+/* Spread legend line */
+.spread-legend-line {
+  width: 24px;
+  height: 2px;
+  background: linear-gradient(90deg, #4ade80, #fbbf24, #f87171);
+  border-radius: 1px;
+  position: relative;
+}
+
+.spread-legend-line::after {
+  content: "";
+  position: absolute;
+  inset: -2px;
+  background: linear-gradient(90deg, #4ade80, #fbbf24, #f87171);
+  filter: blur(4px);
+  opacity: 0.4;
+  border-radius: 2px;
+}
+
 /* Scrollbar styling */
 ::-webkit-scrollbar {
   width: 6px;

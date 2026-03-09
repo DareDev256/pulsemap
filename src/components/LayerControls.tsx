@@ -10,7 +10,7 @@ interface LayerControlsProps {
 const layerConfig = [
   { key: "heatmap" as const, label: "Heat Map", icon: "🌡️" },
   { key: "hotspots" as const, label: "Hotspots", icon: "📍" },
-  { key: "spread" as const, label: "Spread", icon: "🌊", disabled: true },
+  { key: "spread" as const, label: "Spread", icon: "🌊" },
   { key: "newsPins" as const, label: "News Pins", icon: "📰", disabled: true },
 ];
 

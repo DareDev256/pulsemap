@@ -4,6 +4,7 @@ import { useRef, useEffect, useCallback } from "react";
 import mapboxgl from "mapbox-gl";
 import "mapbox-gl/dist/mapbox-gl.css";
 import { OutbreakGeoJSON, OutbreakGeoFeature, LayerVisibility } from "@/types";
+import { generateSpreadArcs } from "@/lib/spread-arcs";
 
 interface PulseMapProps {
   data: OutbreakGeoJSON;
@@ -28,6 +29,7 @@ export default function PulseMap({
   const mapContainer = useRef<HTMLDivElement>(null);
   const map = useRef<mapboxgl.Map | null>(null);
   const markersRef = useRef<mapboxgl.Marker[]>([]);
+  const animationRef = useRef<number | null>(null);
 
   const clearMarkers = useCallback(() => {
     markersRef.current.forEach((m) => m.remove());
@@ -187,11 +189,98 @@ export default function PulseMap({
         },
       });
 
+      // Spread arc source + layers (disease network visualization)
+      const spreadData = generateSpreadArcs(data.features);
+      m.addSource("spread-arcs", {
+        type: "geojson",
+        data: spreadData,
+      });
+
+      // Glow layer — wide, soft, creates the "energy" effect
+      m.addLayer({
+        id: "spread-glow",
+        type: "line",
+        source: "spread-arcs",
+        layout: {
+          visibility: layers.spread ? "visible" : "none",
+          "line-cap": "round",
+          "line-join": "round",
+        },
+        paint: {
+          "line-color": [
+            "match",
+            ["get", "severity"],
+            "critical", "#dc2626",
+            "severe", "#ef4444",
+            "moderate", "#eab308",
+            "low", "#22c55e",
+            "#3b82f6",
+          ],
+          "line-width": [
+            "interpolate", ["linear"], ["zoom"],
+            0, 4,
+            4, 8,
+            8, 12,
+          ],
+          "line-opacity": 0.15,
+          "line-blur": 6,
+        },
+      });
+
+      // Core layer — narrow, bright, the visible arc line
+      m.addLayer({
+        id: "spread-core",
+        type: "line",
+        source: "spread-arcs",
+        layout: {
+          visibility: layers.spread ? "visible" : "none",
+          "line-cap": "round",
+          "line-join": "round",
+        },
+        paint: {
+          "line-color": [
+            "match",
+            ["get", "severity"],
+            "critical", "#f87171",
+            "severe", "#fb923c",
+            "moderate", "#fbbf24",
+            "low", "#4ade80",
+            "#60a5fa",
+          ],
+          "line-width": [
+            "interpolate", ["linear"], ["zoom"],
+            0, 1,
+            4, 1.5,
+            8, 2.5,
+          ],
+          "line-opacity": 0.7,
+          "line-dasharray": [0, 4, 3],
+        },
+      });
+
+      // Animate the dash pattern for "data flowing" effect
+      let dashPhase = 0;
+      const animateDash = () => {
+        dashPhase = (dashPhase + 0.15) % 7;
+        if (m.getLayer("spread-core")) {
+          m.setPaintProperty("spread-core", "line-dasharray", [
+            0,
+            4 + Math.sin(dashPhase) * 0.5,
+            3,
+          ]);
+        }
+        animationRef.current = requestAnimationFrame(animateDash);
+      };
+      if (layers.spread) {
+        animationRef.current = requestAnimationFrame(animateDash);
+      }
+
       // Add hotspot markers
       addHotspotMarkers(m, data.features);
     });
 
     return () => {
+      if (animationRef.current) cancelAnimationFrame(animationRef.current);
       map.current?.remove();
       map.current = null;
     };
@@ -211,6 +300,49 @@ export default function PulseMap({
       );
     }
   }, [layers.heatmap]);
+
+  // Update spread layer visibility
+  useEffect(() => {
+    if (!map.current?.isStyleLoaded()) return;
+    const m = map.current;
+    const vis = layers.spread ? "visible" : "none";
+
+    if (m.getLayer("spread-glow")) {
+      m.setLayoutProperty("spread-glow", "visibility", vis);
+    }
+    if (m.getLayer("spread-core")) {
+      m.setLayoutProperty("spread-core", "visibility", vis);
+    }
+
+    // Start/stop animation based on visibility
+    if (layers.spread && !animationRef.current) {
+      let dashPhase = 0;
+      const animateDash = () => {
+        dashPhase = (dashPhase + 0.15) % 7;
+        if (m.getLayer("spread-core")) {
+          m.setPaintProperty("spread-core", "line-dasharray", [
+            0,
+            4 + Math.sin(dashPhase) * 0.5,
+            3,
+          ]);
+        }
+        animationRef.current = requestAnimationFrame(animateDash);
+      };
+      animationRef.current = requestAnimationFrame(animateDash);
+    } else if (!layers.spread && animationRef.current) {
+      cancelAnimationFrame(animationRef.current);
+      animationRef.current = null;
+    }
+  }, [layers.spread]);
+
+  // Update spread arc data when outbreak data changes
+  useEffect(() => {
+    if (!map.current?.isStyleLoaded()) return;
+    const source = map.current.getSource("spread-arcs") as mapboxgl.GeoJSONSource;
+    if (source) {
+      source.setData(generateSpreadArcs(data.features));
+    }
+  }, [data]);
 
   // Update hotspot markers
   useEffect(() => {

@@ -93,7 +93,7 @@ export default function Home() {
           flyTo={flyTo}
         />
         <LayerControls layers={layers} onToggle={handleLayerToggle} />
-        <Legend />
+        <Legend layers={layers} />
 
         {/* Data source indicator */}
         <div className="absolute top-4 left-1/2 -translate-x-1/2 z-10">
