@@ -11,30 +11,53 @@ interface TimelineSliderProps {
 
 const BINS = 24;
 
-function buildSparkline(features: OutbreakGeoFeature[]): number[] {
-  if (features.length === 0) return Array(BINS).fill(0);
-  const timestamps = features.map((f) => new Date(f.properties.reported_at).getTime());
-  const min = Math.min(...timestamps);
-  const range = (Math.max(...timestamps) - min) || 1;
+function minMax(arr: number[]): [number, number] {
+  let lo = arr[0], hi = arr[0];
+  for (let i = 1; i < arr.length; i++) {
+    if (arr[i] < lo) lo = arr[i];
+    if (arr[i] > hi) hi = arr[i];
+  }
+  return [lo, hi];
+}
+
+function buildSparkline(timestamps: number[], min: number, range: number): number[] {
+  if (timestamps.length === 0) return Array(BINS).fill(0);
   const counts = Array(BINS).fill(0) as number[];
   for (const ts of timestamps) counts[Math.min(BINS - 1, Math.floor(((ts - min) / range) * BINS))]++;
   return counts;
 }
 
+function arrMax(arr: number[]): number {
+  let m = arr[0];
+  for (let i = 1; i < arr.length; i++) if (arr[i] > m) m = arr[i];
+  return m;
+}
+
 const fmtDate = (ts: number) => new Date(ts).toLocaleDateString("en-US", { month: "short", day: "numeric" });
 
 export default function TimelineSlider({ features, value, onChange }: TimelineSliderProps) {
-  const { sparkline, maxCount, minTs, maxTs } = useMemo(() => {
-    const s = buildSparkline(features);
+  const { sparkline, maxCount, minTs, maxTs, sortedTs } = useMemo(() => {
     const ts = features.map((f) => new Date(f.properties.reported_at).getTime());
-    return { sparkline: s, maxCount: Math.max(...s, 1), minTs: Math.min(...ts), maxTs: Math.max(...ts) };
+    if (ts.length === 0) return { sparkline: Array(BINS).fill(0) as number[], maxCount: 1, minTs: 0, maxTs: 0, sortedTs: [] as number[] };
+    const [min, max] = minMax(ts);
+    const range = (max - min) || 1;
+    const s = buildSparkline(ts, min, range);
+    const sorted = ts.slice().sort((a, b) => a - b);
+    return { sparkline: s, maxCount: Math.max(arrMax(s), 1), minTs: min, maxTs: max, sortedTs: sorted };
   }, [features]);
 
   const cutoff = minTs + ((maxTs - minTs) * value) / 100;
-  const visibleCount = useMemo(
-    () => features.filter((f) => new Date(f.properties.reported_at).getTime() <= cutoff).length,
-    [features, cutoff]
-  );
+
+  const visibleCount = useMemo(() => {
+    if (sortedTs.length === 0) return 0;
+    let lo = 0, hi = sortedTs.length;
+    while (lo < hi) {
+      const mid = (lo + hi) >>> 1;
+      if (sortedTs[mid] <= cutoff) lo = mid + 1;
+      else hi = mid;
+    }
+    return lo;
+  }, [sortedTs, cutoff]);
 
   const handleChange = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => onChange(Number(e.target.value)),

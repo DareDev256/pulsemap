@@ -57,21 +57,30 @@ export default function Home() {
     loadData();
   }, []);
 
+  // Precompute timestamps once (avoids re-parsing Date strings in every downstream memo)
+  const { timestamps, minTs, maxTs } = useMemo(() => {
+    const ts = outbreakData.features.map((f) => new Date(f.properties.reported_at).getTime());
+    if (ts.length === 0) return { timestamps: ts, minTs: 0, maxTs: 0 };
+    let lo = ts[0], hi = ts[0];
+    for (let i = 1; i < ts.length; i++) {
+      if (ts[i] < lo) lo = ts[i];
+      if (ts[i] > hi) hi = ts[i];
+    }
+    return { timestamps: ts, minTs: lo, maxTs: hi };
+  }, [outbreakData]);
+
   // Filter features by timeline position
   const filteredData = useMemo(() => {
     if (timelineValue >= 100) return outbreakData;
-    const timestamps = outbreakData.features.map((f) => new Date(f.properties.reported_at).getTime());
     if (timestamps.length === 0) return outbreakData;
-    const min = Math.min(...timestamps);
-    const max = Math.max(...timestamps);
-    const cutoff = min + ((max - min) * timelineValue) / 100;
+    const cutoff = minTs + ((maxTs - minTs) * timelineValue) / 100;
     return {
       ...outbreakData,
       features: outbreakData.features.filter(
-        (f) => new Date(f.properties.reported_at).getTime() <= cutoff
+        (_, i) => timestamps[i] <= cutoff
       ),
     };
-  }, [outbreakData, timelineValue]);
+  }, [outbreakData, timelineValue, timestamps, minTs, maxTs]);
 
   const filteredFeed = useMemo(() => {
     if (timelineValue >= 100) return feedItems;
