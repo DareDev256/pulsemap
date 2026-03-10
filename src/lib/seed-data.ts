@@ -19,6 +19,7 @@ export const seedOutbreaks: OutbreakGeoJSON = {
         region: "Eastern Provinces",
         status: "active",
         summary: "Ongoing mpox outbreak with sustained community transmission across eastern provinces.",
+        reported_at: "2025-12-01T08:00:00Z",
       },
     },
     {
@@ -35,6 +36,7 @@ export const seedOutbreaks: OutbreakGeoJSON = {
         region: null,
         status: "active",
         summary: "Cross-border mpox spread from DR Congo with local transmission chains.",
+        reported_at: "2025-12-10T14:00:00Z",
       },
     },
     {
@@ -51,6 +53,7 @@ export const seedOutbreaks: OutbreakGeoJSON = {
         region: null,
         status: "active",
         summary: "Mpox cases increasing with community transmission.",
+        reported_at: "2025-12-15T10:00:00Z",
       },
     },
     {
@@ -67,6 +70,7 @@ export const seedOutbreaks: OutbreakGeoJSON = {
         region: null,
         status: "active",
         summary: "Mpox cases detected with containment measures in place.",
+        reported_at: "2025-12-22T06:00:00Z",
       },
     },
     {
@@ -83,6 +87,7 @@ export const seedOutbreaks: OutbreakGeoJSON = {
         region: null,
         status: "active",
         summary: "Active mpox surveillance with sporadic community cases.",
+        reported_at: "2025-12-28T12:00:00Z",
       },
     },
     {
@@ -99,6 +104,7 @@ export const seedOutbreaks: OutbreakGeoJSON = {
         region: "Banadir",
         status: "active",
         summary: "Severe cholera outbreak exacerbated by flooding and displacement.",
+        reported_at: "2025-12-05T09:00:00Z",
       },
     },
     {
@@ -115,6 +121,7 @@ export const seedOutbreaks: OutbreakGeoJSON = {
         region: "Oromia",
         status: "active",
         summary: "Cholera outbreak spreading across multiple regions.",
+        reported_at: "2025-12-12T16:00:00Z",
       },
     },
     {
@@ -131,6 +138,7 @@ export const seedOutbreaks: OutbreakGeoJSON = {
         region: "Dhaka Division",
         status: "active",
         summary: "Record dengue season with healthcare system under significant strain.",
+        reported_at: "2026-01-03T08:00:00Z",
       },
     },
     {
@@ -147,6 +155,7 @@ export const seedOutbreaks: OutbreakGeoJSON = {
         region: "Rio de Janeiro",
         status: "active",
         summary: "Major dengue epidemic with emergency measures declared in multiple states.",
+        reported_at: "2026-01-08T11:00:00Z",
       },
     },
     {
@@ -163,6 +172,7 @@ export const seedOutbreaks: OutbreakGeoJSON = {
         region: "Multiple States",
         status: "active",
         summary: "Elevated dengue activity across southern and coastal states.",
+        reported_at: "2026-01-10T15:00:00Z",
       },
     },
     {
@@ -179,6 +189,7 @@ export const seedOutbreaks: OutbreakGeoJSON = {
         region: null,
         status: "active",
         summary: "Protracted cholera crisis with ongoing transmission in conflict-affected areas.",
+        reported_at: "2025-12-18T07:00:00Z",
       },
     },
     {
@@ -195,6 +206,7 @@ export const seedOutbreaks: OutbreakGeoJSON = {
         region: null,
         status: "active",
         summary: "Measles resurgence driven by vaccination gaps in border provinces.",
+        reported_at: "2026-01-05T13:00:00Z",
       },
     },
     {
@@ -211,6 +223,7 @@ export const seedOutbreaks: OutbreakGeoJSON = {
         region: "Multiple Provinces",
         status: "active",
         summary: "Widespread measles outbreak affecting children under 5 with limited vaccine access.",
+        reported_at: "2025-12-20T10:00:00Z",
       },
     },
     {
@@ -227,6 +240,7 @@ export const seedOutbreaks: OutbreakGeoJSON = {
         region: "Balochistan / KPK",
         status: "active",
         summary: "Circulating vaccine-derived poliovirus with environmental detections.",
+        reported_at: "2026-01-12T09:00:00Z",
       },
     },
     {
@@ -243,6 +257,7 @@ export const seedOutbreaks: OutbreakGeoJSON = {
         region: "Gaza",
         status: "active",
         summary: "Poliovirus detected amid disrupted healthcare infrastructure.",
+        reported_at: "2026-01-15T14:00:00Z",
       },
     },
     {
@@ -259,6 +274,7 @@ export const seedOutbreaks: OutbreakGeoJSON = {
         region: "Multiple Provinces",
         status: "monitoring",
         summary: "Sporadic human H5N1 cases linked to poultry exposure. Monitoring for sustained transmission.",
+        reported_at: "2026-01-18T08:00:00Z",
       },
     },
     {
@@ -275,6 +291,7 @@ export const seedOutbreaks: OutbreakGeoJSON = {
         region: "Multiple States",
         status: "active",
         summary: "H5N1 detected in dairy cattle herds with sporadic human cases among farm workers.",
+        reported_at: "2026-01-20T16:00:00Z",
       },
     },
     {
@@ -291,6 +308,7 @@ export const seedOutbreaks: OutbreakGeoJSON = {
         region: "Central Region",
         status: "active",
         summary: "Sudan ebolavirus outbreak with active case finding and contact tracing.",
+        reported_at: "2026-01-22T11:00:00Z",
       },
     },
     {
@@ -307,6 +325,7 @@ export const seedOutbreaks: OutbreakGeoJSON = {
         region: null,
         status: "active",
         summary: "Ongoing cholera transmission amid water and sanitation infrastructure challenges.",
+        reported_at: "2026-01-25T07:00:00Z",
       },
     },
     {
@@ -323,6 +342,7 @@ export const seedOutbreaks: OutbreakGeoJSON = {
         region: null,
         status: "active",
         summary: "Above-average dengue season with focus on vector control measures.",
+        reported_at: "2026-01-27T13:00:00Z",
       },
     },
     {
@@ -339,6 +359,7 @@ export const seedOutbreaks: OutbreakGeoJSON = {
         region: "Multiple Provinces",
         status: "active",
         summary: "Endemic malaria with seasonal surge exceeding response capacity.",
+        reported_at: "2025-12-08T10:00:00Z",
       },
     },
     {
@@ -355,6 +376,7 @@ export const seedOutbreaks: OutbreakGeoJSON = {
         region: "Northern States",
         status: "active",
         summary: "Diphtheria outbreak in states with low routine immunization coverage.",
+        reported_at: "2026-01-28T15:00:00Z",
       },
     },
     {
@@ -371,6 +393,7 @@ export const seedOutbreaks: OutbreakGeoJSON = {
         region: null,
         status: "active",
         summary: "Large measles outbreak among displaced populations with limited healthcare access.",
+        reported_at: "2026-01-30T09:00:00Z",
       },
     },
     {
@@ -387,6 +410,7 @@ export const seedOutbreaks: OutbreakGeoJSON = {
         region: "Java",
         status: "active",
         summary: "Dengue cases rising with onset of rainy season across Java and Sumatra.",
+        reported_at: "2026-02-01T06:00:00Z",
       },
     },
     {
@@ -403,6 +427,7 @@ export const seedOutbreaks: OutbreakGeoJSON = {
         region: "Western Kenya",
         status: "active",
         summary: "Marburg virus outbreak with active surveillance at borders.",
+        reported_at: "2026-02-01T14:00:00Z",
       },
     },
   ],

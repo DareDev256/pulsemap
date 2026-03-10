@@ -2,6 +2,14 @@
 
 All notable changes to PulseMap will be documented in this file.
 
+## [0.4.0] - 2026-03-10
+
+### Added
+
+- **Historical timeline slider** — Draggable range input with sparkline density visualization. Scrubbing the slider filters all visible outbreaks by reported date — heatmap, hotspot markers, spread arcs, stats bar, and feed all update in real-time. Custom-styled thin-line thumb with accent glow, activity bars colored by outbreak density (red for high-activity bins, blue for normal), and a visible/total count badge. Fully accessible with `aria-valuetext` announcing the current date and outbreak count.
+- **`reported_at` field** on `OutbreakGeoFeature` — threads temporal data from the Supabase `outbreak_locations.reported_at` column through the GeoJSON pipeline, enabling date-based filtering across the entire UI.
+- **Seed data dates** — All 25 static outbreak features now include realistic `reported_at` timestamps spanning Dec 2025–Feb 2026.
+
 ## [0.3.0] - 2026-03-08
 
 ### Added

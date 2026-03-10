@@ -14,6 +14,7 @@ export async function fetchOutbreakGeoJSON(): Promise<OutbreakGeoJSON> {
       region,
       case_count,
       severity_score,
+      reported_at,
       outbreaks (
         id,
         disease_name,
@@ -54,6 +55,7 @@ export async function fetchOutbreakGeoJSON(): Promise<OutbreakGeoJSON> {
         region: loc.region,
         status: outbreak.status,
         summary: outbreak.summary,
+        reported_at: loc.reported_at || new Date().toISOString(),
       },
     };
   });

@@ -122,6 +122,41 @@ body {
   border-radius: 2px;
 }
 
+/* Timeline range slider */
+.timeline-range {
+  -webkit-appearance: none;
+  appearance: none;
+  height: 14px;
+  background: transparent;
+  cursor: pointer;
+  margin: 0;
+}
+.timeline-range::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 3px; height: 24px;
+  background: var(--accent);
+  border: none; border-radius: 1px;
+  box-shadow: 0 0 8px rgba(59, 130, 246, 0.5);
+  margin-top: -5px;
+}
+.timeline-range::-moz-range-thumb {
+  width: 3px; height: 24px;
+  background: var(--accent);
+  border: none; border-radius: 1px;
+  box-shadow: 0 0 8px rgba(59, 130, 246, 0.5);
+}
+.timeline-range::-webkit-slider-runnable-track,
+.timeline-range::-moz-range-track {
+  height: 2px;
+  background: var(--border);
+  border-radius: 1px;
+}
+.timeline-range:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+  border-radius: 2px;
+}
+
 /* Scrollbar styling */
 ::-webkit-scrollbar {
   width: 6px;

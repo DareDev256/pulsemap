@@ -32,6 +32,7 @@ This isn't a wrapper around an API. It's a full data pipeline: ingestion from WH
 | **Stats bar** | Aggregate dashboard strip — outbreak count, total cases, countries affected, critical alerts, severity distribution, top disease |
 | **Live feed** | Chronological outbreak reports with source badges — scrollable, searchable |
 | **Search** | Filter map + feed by disease name or country |
+| **Timeline slider** | Draggable temporal filter with sparkline density visualization — scrub through outbreak history, all layers + feed + stats update in real-time |
 | **Spread network** | Animated great-circle arcs connecting outbreak locations of the same disease — glowing lines with flowing dash animation, color-coded by severity |
 | **Layer toggles** | Independent visibility controls for heatmap, hotspot, and spread layers |
 | **Data source indicator** | Real-time badge showing whether you're seeing live Supabase data or static fallback |
@@ -64,13 +65,13 @@ This isn't a wrapper around an API. It's a full data pipeline: ingestion from WH
 | Layer | Choice | Rationale |
 |-------|--------|-----------|
 | Framework | **Next.js 16** (App Router) | SSR + server routes + Vercel-native cron |
-| UI | **React 19** + TypeScript | Strict typing across all 7 components |
+| UI | **React 19** + TypeScript | Strict typing across all 8 components |
 | Styling | **Tailwind CSS 4** | Custom dark theme, no default palette |
 | Map | **Mapbox GL JS** | Heatmap layers, smooth fly-to, dark basemap |
 | Database | **Supabase** (Postgres) | Row-level security, realtime subscriptions |
 | Data Source | **WHO DON API** | Structured, authoritative, global coverage |
 | Geocoding | **Mapbox Geocoding** + static lookup | Hybrid: API for precision, static for speed |
-| Testing | **Vitest** | 43 unit tests across data ingestion, WHO parser, + spread arcs |
+| Testing | **Vitest** | 43 unit tests across data ingestion, WHO parser, spread arcs |
 | Hosting | **Vercel** | Auto-deploy, cron scheduling, edge CDN |
 
 ## Getting Started
@@ -178,6 +179,7 @@ src/
 │   ├── page.tsx           # Main dashboard (client component)
 │   └── globals.css        # Dark theme + hotspot marker animations
 ├── components/
+│   ├── TimelineSlider.tsx   # Temporal filter with sparkline + range input
 │   ├── PulseMap.tsx        # Mapbox GL map with heatmap + markers
 │   ├── Feed.tsx            # Scrollable outbreak feed
 │   ├── Navbar.tsx          # Top bar with search
@@ -214,7 +216,7 @@ src/
 - **Phase 4+** — LLM-powered extraction from general news APIs
 - **Phase 5** — Community reporting + moderation + trust scoring
 - **Phase 5** — Real-time Supabase subscriptions
-- Historical timeline slider
+- ~~Historical timeline slider~~ ✅ Shipped in v0.4.0
 - Mobile-responsive layout + PWA offline access
 
 ## Data Sources

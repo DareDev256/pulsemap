@@ -53,6 +53,7 @@ export interface OutbreakGeoFeature {
     region: string | null;
     status: OutbreakStatus;
     summary: string | null;
+    reported_at: string;
   };
 }
 

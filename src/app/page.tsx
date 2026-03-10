@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback, useEffect } from "react";
+import { useState, useCallback, useEffect, useMemo } from "react";
 import Navbar from "@/components/Navbar";
 import PulseMap from "@/components/PulseMap";
 import LayerControls from "@/components/LayerControls";
@@ -8,6 +8,7 @@ import Legend from "@/components/Legend";
 import OutbreakDetail from "@/components/OutbreakDetail";
 import Feed from "@/components/Feed";
 import StatsBar from "@/components/StatsBar";
+import TimelineSlider from "@/components/TimelineSlider";
 import { seedOutbreaks, seedFeedItems, FeedItem } from "@/lib/seed-data";
 import { fetchOutbreakGeoJSON, fetchFeedItems } from "@/lib/fetch-outbreaks";
 import { OutbreakGeoJSON, OutbreakGeoFeature, LayerVisibility } from "@/types";
@@ -26,6 +27,7 @@ export default function Home() {
   const [flyTo, setFlyTo] = useState<[number, number] | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [dataSource, setDataSource] = useState<"loading" | "supabase" | "static">("loading");
+  const [timelineValue, setTimelineValue] = useState(100);
 
   // Fetch live data from Supabase on mount
   useEffect(() => {
@@ -54,6 +56,28 @@ export default function Home() {
 
     loadData();
   }, []);
+
+  // Filter features by timeline position
+  const filteredData = useMemo(() => {
+    if (timelineValue >= 100) return outbreakData;
+    const timestamps = outbreakData.features.map((f) => new Date(f.properties.reported_at).getTime());
+    if (timestamps.length === 0) return outbreakData;
+    const min = Math.min(...timestamps);
+    const max = Math.max(...timestamps);
+    const cutoff = min + ((max - min) * timelineValue) / 100;
+    return {
+      ...outbreakData,
+      features: outbreakData.features.filter(
+        (f) => new Date(f.properties.reported_at).getTime() <= cutoff
+      ),
+    };
+  }, [outbreakData, timelineValue]);
+
+  const filteredFeed = useMemo(() => {
+    if (timelineValue >= 100) return feedItems;
+    const visibleIds = new Set(filteredData.features.map((f) => f.properties.outbreak_id));
+    return feedItems.filter((item) => visibleIds.has(item.outbreak_id));
+  }, [feedItems, filteredData, timelineValue]);
 
   const handleLayerToggle = useCallback((layer: keyof LayerVisibility) => {
     setLayers((prev) => ({ ...prev, [layer]: !prev[layer] }));
@@ -87,7 +111,7 @@ export default function Home() {
       {/* Map Section */}
       <div className="relative flex-1" style={{ minHeight: "55vh" }}>
         <PulseMap
-          data={outbreakData}
+          data={filteredData}
           layers={layers}
           onFeatureClick={handleFeatureClick}
           flyTo={flyTo}
@@ -120,12 +144,19 @@ export default function Home() {
       </div>
 
       {/* Stats Bar */}
-      <StatsBar data={outbreakData} />
+      <StatsBar data={filteredData} />
+
+      {/* Timeline Slider */}
+      <TimelineSlider
+        features={outbreakData.features}
+        value={timelineValue}
+        onChange={setTimelineValue}
+      />
 
       {/* Feed Section */}
-      <div className="flex-none border-t border-border" style={{ height: "calc(35vh - 28px)" }}>
+      <div className="flex-none border-t border-border" style={{ height: "calc(35vh - 68px)" }}>
         <Feed
-          items={feedItems}
+          items={filteredFeed}
           searchQuery={searchQuery}
           onItemClick={handleFeedItemClick}
         />

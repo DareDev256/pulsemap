@@ -23,6 +23,7 @@ function makeFeature(
       region: null,
       status: "active",
       summary: null,
+      reported_at: "2026-01-15T00:00:00Z",
     },
   };
 }
