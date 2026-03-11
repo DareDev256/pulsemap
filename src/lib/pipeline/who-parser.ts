@@ -1,7 +1,10 @@
 import { RawOutbreakReport } from "./types";
 
-const WHO_API_URL =
-  "https://www.who.int/api/hubs/diseaseoutbreaknews?$orderby=PublicationDate%20desc&$top=50&$select=DonId,Title,PublicationDate,Summary,UrlName";
+export const WHO_BASE_URL =
+  "https://www.who.int/api/hubs/diseaseoutbreaknews";
+
+const WHO_LATEST_URL =
+  `${WHO_BASE_URL}?$orderby=PublicationDate%20desc&$top=50&$select=DonId,Title,PublicationDate,Summary,UrlName`;
 
 // Known disease keywords to extract from titles
 const DISEASE_PATTERNS: [RegExp, string][] = [
@@ -70,7 +73,7 @@ export function estimateSeverity(title: string, summary: string): "low" | "moder
   return "low";
 }
 
-interface WHODon {
+export interface WHODon {
   DonId: string;
   Title: string;
   PublicationDate: string;
@@ -83,7 +86,7 @@ export async function fetchWHOOutbreaks(): Promise<RawOutbreakReport[]> {
   const timeout = setTimeout(() => controller.abort(), 15_000);
 
   try {
-    const res = await fetch(WHO_API_URL, {
+    const res = await fetch(WHO_LATEST_URL, {
       headers: { "User-Agent": "PulseMap/1.0 (health-surveillance-dashboard)" },
       signal: controller.signal,
       next: { revalidate: 0 },
@@ -133,4 +136,70 @@ export async function fetchWHOOutbreaks(): Promise<RawOutbreakReport[]> {
   } finally {
     clearTimeout(timeout);
   }
+}
+
+/**
+ * Fetch WHO DON items within a date range (used by backfill endpoint).
+ * Shares extractors with fetchWHOOutbreaks — single source of truth.
+ */
+export async function fetchWHOByDateRange(
+  startDate: string,
+  endDate: string,
+  limit: number
+): Promise<RawOutbreakReport[]> {
+  const filter = `PublicationDate ge ${startDate}T00:00:00Z and PublicationDate le ${endDate}T23:59:59Z`;
+  const params = new URLSearchParams({
+    $filter: filter,
+    $orderby: "PublicationDate desc",
+    $top: String(limit),
+    $select: "DonId,Title,PublicationDate,Summary,UrlName",
+  });
+
+  const url = `${WHO_BASE_URL}?${params.toString()}`;
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), 15_000);
+
+  try {
+    const res = await fetch(url, {
+      headers: { "User-Agent": "PulseMap/1.0 (health-surveillance-dashboard)" },
+      signal: controller.signal,
+      next: { revalidate: 0 },
+    });
+
+    if (!res.ok) {
+      throw new Error(`WHO API returned ${res.status}: ${res.statusText}`);
+    }
+
+    const json = await res.json();
+    return parseWHOItems(json.value || []);
+  } finally {
+    clearTimeout(timeout);
+  }
+}
+
+/** Shared WHO DON item → RawOutbreakReport mapper */
+function parseWHOItems(items: WHODon[]): RawOutbreakReport[] {
+  const reports: RawOutbreakReport[] = [];
+  for (const item of items) {
+    const disease = extractDisease(item.Title);
+    const country = extractCountry(item.Title);
+    const severity = estimateSeverity(item.Title, item.Summary || "");
+
+    if (country === "Global" || country === "Global update") continue;
+
+    reports.push({
+      disease_name: disease,
+      country,
+      region: null,
+      title: item.Title,
+      summary: (item.Summary || "").substring(0, 500),
+      url: `https://www.who.int/emergencies/disease-outbreak-news/item/${item.UrlName}`,
+      source_type: "who",
+      source_name: "WHO",
+      published_at: new Date(item.PublicationDate).toISOString(),
+      severity_hint: severity,
+      case_count: null,
+    });
+  }
+  return reports;
 }

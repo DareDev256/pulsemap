@@ -2,6 +2,19 @@
 
 All notable changes to PulseMap will be documented in this file.
 
+## [0.5.0] - 2026-03-11
+
+### Changed
+
+- **Extracted shared `api-client` module** (`src/lib/api-client.ts`) — Single entry point for client-side dashboard data loading. Encapsulates parallel Supabase fetches, empty-result detection, and static fallback logic that was previously inlined in the page component. Exports typed `loadDashboardData()`, `DashboardData` interface, and `DataSource` type.
+- **Eliminated 60+ lines of duplicated WHO parsing code** — `backfill/route.ts` copy-pasted `DISEASE_PATTERNS`, `extractDisease`, `extractCountry`, `estimateSeverity`, and the `WHODon` interface from `who-parser.ts`. All removed; backfill now imports from the canonical source.
+- **Consolidated `fetchWHOByDateRange` into `who-parser.ts`** — Date-range WHO fetch was isolated in the backfill route with no test coverage. Now lives alongside `fetchWHOOutbreaks` sharing the same extractors and `parseWHOItems` mapper. Single source of truth for all WHO API interactions.
+- **Simplified `page.tsx` data loading** — useEffect reduced from 20 lines of manual orchestration to a single `loadDashboardData()` call with destructured result.
+
+### Fixed
+
+- **`extractCountry` regex bug in backfill route** — The duplicated version used `/[-–—]\s*(.+?)$/` (missing greedy `.*` prefix), causing it to match the first dash in hyphenated disease names like "COVID-19" instead of the last separator. Now uses the corrected who-parser version with `.*[-–—]` (fixed in v0.2.4 but never propagated to backfill).
+
 ## [0.4.0] - 2026-03-10
 
 ### Added

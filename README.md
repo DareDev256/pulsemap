@@ -187,6 +187,7 @@ src/
 │   ├── Legend.tsx          # Color severity legend
 │   └── OutbreakDetail.tsx  # Click-to-detail side panel
 ├── lib/
+│   ├── api-client.ts       # Dashboard data loader (single entry point)
 │   ├── fetch-outbreaks.ts  # Supabase query → GeoJSON transform
 │   ├── spread-arcs.ts      # Great-circle arc generator for disease networks
 │   ├── pipeline/           # WHO API client + geocoding + dedup

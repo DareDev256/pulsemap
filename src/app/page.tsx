@@ -9,8 +9,9 @@ import OutbreakDetail from "@/components/OutbreakDetail";
 import Feed from "@/components/Feed";
 import StatsBar from "@/components/StatsBar";
 import TimelineSlider from "@/components/TimelineSlider";
-import { seedOutbreaks, seedFeedItems, FeedItem } from "@/lib/seed-data";
-import { fetchOutbreakGeoJSON, fetchFeedItems } from "@/lib/fetch-outbreaks";
+import { FeedItem } from "@/lib/seed-data";
+import { seedOutbreaks, seedFeedItems } from "@/lib/seed-data";
+import { loadDashboardData, DataSource } from "@/lib/api-client";
 import { OutbreakGeoJSON, OutbreakGeoFeature, LayerVisibility } from "@/types";
 
 export default function Home() {
@@ -26,35 +27,16 @@ export default function Home() {
     useState<OutbreakGeoFeature | null>(null);
   const [flyTo, setFlyTo] = useState<[number, number] | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
-  const [dataSource, setDataSource] = useState<"loading" | "supabase" | "static">("loading");
+  const [dataSource, setDataSource] = useState<DataSource>("loading");
   const [timelineValue, setTimelineValue] = useState(100);
 
   // Fetch live data from Supabase on mount
   useEffect(() => {
-    async function loadData() {
-      try {
-        const [geoData, feed] = await Promise.all([
-          fetchOutbreakGeoJSON(),
-          fetchFeedItems(),
-        ]);
-
-        if (geoData.features.length > 0) {
-          setOutbreakData(geoData);
-          setDataSource("supabase");
-        } else {
-          setDataSource("static");
-        }
-
-        if (feed.length > 0) {
-          setFeedItems(feed);
-        }
-      } catch {
-        console.warn("Failed to fetch from Supabase, using static data");
-        setDataSource("static");
-      }
-    }
-
-    loadData();
+    loadDashboardData().then((result) => {
+      setOutbreakData(result.outbreakData);
+      setFeedItems(result.feedItems);
+      setDataSource(result.dataSource);
+    });
   }, []);
 
   // Precompute timestamps once (avoids re-parsing Date strings in every downstream memo)
