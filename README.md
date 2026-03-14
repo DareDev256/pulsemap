@@ -165,6 +165,7 @@ npm run test:watch   # Watch mode
 - **Timing-safe token comparison** -- Bearer tokens are compared in constant time to prevent timing attacks
 - **Error sanitization** -- API errors never leak stack traces or internal paths to clients
 - **Input allowlisting** -- the `source` parameter is validated against a strict allowlist
+- **Centralized input validation** -- backfill endpoint enforces Content-Type, safe JSON parsing, calendar-valid dates (round-trip check rejects `02-30`), 365-day max range, future date rejection, and strict numeric limit typing
 - **Upstream timeouts** -- all external API fetches use `AbortController` with a 15s deadline
 - **Fail-fast env validation** -- server-side Supabase client throws immediately if credentials are missing instead of failing silently
 
