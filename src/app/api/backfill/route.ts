@@ -3,6 +3,7 @@ import { processReports } from "@/lib/pipeline/dedup";
 import { fetchWHOByDateRange } from "@/lib/pipeline/who-parser";
 import { RawOutbreakReport } from "@/lib/pipeline/types";
 import { validatePipelineAuth, sanitizeErrorMessage } from "@/lib/pipeline/auth";
+import { safeJsonResponse } from "@/lib/pipeline/validate";
 
 export const maxDuration = 120; // Backfill may process larger batches
 export const dynamic = "force-dynamic";
@@ -22,8 +23,20 @@ export async function POST(request: NextRequest) {
   const startTime = Date.now();
 
   try {
-    const body = await request.json();
-    const { startDate, endDate, limit = 200 } = body;
+    const parsed = await safeJsonResponse<Record<string, unknown>>(request, "backfill request");
+    if (!parsed.ok) {
+      return NextResponse.json(
+        { error: "Request body must be valid JSON" },
+        { status: 400 }
+      );
+    }
+    const body = parsed.data;
+    const { startDate, endDate, limit = 200 } = body as {
+      startDate?: string;
+      endDate?: string;
+      limit?: number;
+      source?: string;
+    };
 
     // Validate source against allowlist — never reflect raw user input
     const source = ALLOWED_SOURCES.has(body.source) ? body.source : null;

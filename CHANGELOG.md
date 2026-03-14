@@ -2,6 +2,18 @@
 
 All notable changes to PulseMap will be documented in this file.
 
+## [0.5.1] - 2026-03-14
+
+### Fixed
+
+- **Pipeline crash on non-JSON API responses** — WHO API endpoints (`fetchWHOOutbreaks`, `fetchWHOByDateRange`) and the backfill route all called `res.json()` directly, which throws `SyntaxError` on HTML error pages (502/503 from CDN proxies). Created `safeJsonResponse<T>()` wrapper that catches parse failures and returns typed `ParseResult<T>` discriminated unions instead of throwing.
+- **Prototype pollution in parsed JSON** — `stripDangerousKeys()` recursively removes `__proto__`, `constructor`, and `prototype` keys from all externally-parsed JSON, depth-capped at 20 levels to prevent stack overflow.
+
+### Added
+
+- **`src/lib/pipeline/validate.ts`** — Safe JSON parsing module with `safeParseJSON<T>()`, `safeJsonResponse<T>()`, and `stripDangerousKeys()`. Single choke-point for all external data entering the pipeline.
+- **21 new unit tests** — Full coverage of safe parsing (string, non-string, empty, invalid), response wrapping (valid JSON, HTML error pages, empty body), and prototype-pollution defense (nested stripping, array handling, depth cap, Object.prototype integrity).
+
 ## [0.5.0] - 2026-03-11
 
 ### Changed

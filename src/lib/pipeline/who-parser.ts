@@ -1,4 +1,5 @@
 import { RawOutbreakReport } from "./types";
+import { safeJsonResponse } from "./validate";
 
 export const WHO_BASE_URL =
   "https://www.who.int/api/hubs/diseaseoutbreaknews";
@@ -97,8 +98,12 @@ export async function fetchWHOOutbreaks(): Promise<RawOutbreakReport[]> {
       return [];
     }
 
-    const json = await res.json();
-    const items: WHODon[] = json.value || [];
+    const parsed = await safeJsonResponse<{ value?: WHODon[] }>(res, "WHO API");
+    if (!parsed.ok) {
+      console.error(`WHO API parse error: ${parsed.error}`);
+      return [];
+    }
+    const items: WHODon[] = parsed.data.value || [];
     const reports: RawOutbreakReport[] = [];
 
     for (const item of items) {
@@ -170,8 +175,11 @@ export async function fetchWHOByDateRange(
       throw new Error(`WHO API returned ${res.status}: ${res.statusText}`);
     }
 
-    const json = await res.json();
-    return parseWHOItems(json.value || []);
+    const parsed = await safeJsonResponse<{ value?: WHODon[] }>(res, "WHO backfill");
+    if (!parsed.ok) {
+      throw new Error(`WHO backfill parse error: ${parsed.error}`);
+    }
+    return parseWHOItems(parsed.data.value || []);
   } finally {
     clearTimeout(timeout);
   }
